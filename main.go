@@ -17,7 +17,7 @@ type Pair struct {
 func main() {
 
 	r := mux.NewRouter()
-	r.HandleFunc("/pairs", ServeHTTP).Methods(http.MethodPost)
+	r.Handle("/pairs", &PairHandler{createPairDevice}).Methods(http.MethodPost)
 
 	srv := http.Server{
 		Handler: r,
@@ -28,7 +28,11 @@ func main() {
 	log.Fatal(srv.ListenAndServe())
 }
 
-func ServeHTTP(w http.ResponseWriter, r *http.Request) {
+type PairHandler struct {
+	createPairDevice CreatePairDevice
+}
+
+func (ph *PairHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var d Pair
 	err := json.NewDecoder(r.Body).Decode(&d)
 	if err != nil {
@@ -37,7 +41,7 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = createPairDevice(d)
+	err = ph.createPairDevice(d)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
