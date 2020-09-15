@@ -10,7 +10,7 @@ import (
 
 func TestCreateDeviceHandler(t *testing.T) {
 	payload := new(bytes.Buffer)
-	json.NewEncoder(payload).Encode(Device{ID: 1234, UserID: 4333})
+	json.NewEncoder(payload).Encode(Pair{ID: 1234, UserID: 4333})
 	req := httptest.NewRequest(http.MethodPost, "/devices", payload)
 	rec := httptest.NewRecorder()
 

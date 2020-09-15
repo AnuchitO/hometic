@@ -1,10 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 )
+
+type Pair struct {
+	ID     int64
+	UserID int64
+}
 
 func main() {
 
@@ -21,6 +27,13 @@ func main() {
 }
 
 func CreateDevicesHandler(w http.ResponseWriter, r *http.Request) {
+	var d Pair
+	err := json.NewDecoder(r.Body).Decode(&d)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
 
 	w.Write([]byte(`{"status":"active"}`))
 }
