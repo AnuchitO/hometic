@@ -20,13 +20,17 @@ type JSONResponseWriter struct {
 }
 
 func (w *JSONResponseWriter) Write(p []byte) (int, error) {
-	w.Header().Set("content-type", "application/json")
+	w.json()
 	return w.ResponseWriter.Write(p)
 }
 
 func (w JSONResponseWriter) WriteHeader(statusCode int) {
-	w.Header().Set("content-type", "application/json")
+	w.json()
 	w.ResponseWriter.WriteHeader(statusCode)
+}
+
+func (w JSONResponseWriter) json() {
+	w.Header().Set("content-type", "application/json")
 }
 
 func main() {
