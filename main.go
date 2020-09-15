@@ -17,7 +17,7 @@ type Pair struct {
 func main() {
 
 	r := mux.NewRouter()
-	r.Handle("/pairs", CreatePairHandler(createPairDevice)).Methods(http.MethodPost)
+	r.Handle("/pairs", CreatePairHandler(createPairDevice{})).Methods(http.MethodPost)
 
 	srv := http.Server{
 		Handler: r,
@@ -28,7 +28,7 @@ func main() {
 	log.Fatal(srv.ListenAndServe())
 }
 
-func CreatePairHandler(createPairDevice CreatePairDeviceFunc) http.HandlerFunc {
+func CreatePairHandler(device Device) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var d Pair
 		err := json.NewDecoder(r.Body).Decode(&d)
@@ -38,7 +38,7 @@ func CreatePairHandler(createPairDevice CreatePairDeviceFunc) http.HandlerFunc {
 			return
 		}
 
-		err = createPairDevice(d)
+		err = device.Pair(d)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(err.Error())
@@ -49,9 +49,16 @@ func CreatePairHandler(createPairDevice CreatePairDeviceFunc) http.HandlerFunc {
 	}
 }
 
+type Device interface {
+	Pair(p Pair) error
+}
+
 type CreatePairDeviceFunc func(p Pair) error
 
-func createPairDevice(p Pair) error {
+type createPairDevice struct {
+}
+
+func (createPairDevice) Pair(p Pair) error {
 	db, err := sql.Open("sqlite3", "hometic.db")
 	if err != nil {
 		log.Fatal(err)
