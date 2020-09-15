@@ -24,13 +24,18 @@ func (w *JSONResponseWriter) Write(p []byte) (int, error) {
 	return w.ResponseWriter.Write(p)
 }
 
-func (w JSONResponseWriter) WriteHeader(statusCode int) {
+func (w *JSONResponseWriter) WriteHeader(statusCode int) {
 	w.json()
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
-func (w JSONResponseWriter) json() {
+func (w *JSONResponseWriter) json() {
 	w.Header().Set("content-type", "application/json")
+}
+
+func (w *JSONResponseWriter) JSON(statusCode int, data interface{})  {
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(data)
 }
 
 func main() {
@@ -75,8 +80,7 @@ func CreatePairHandler(device Device) http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"active"}`))
+		w.(*JSONResponseWriter).JSON(http.StatusOK, `{"status":"active"}`)
 	}
 }
 
