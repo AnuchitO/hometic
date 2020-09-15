@@ -29,7 +29,7 @@ func main() {
 }
 
 type PairHandler struct {
-	createPairDevice CreatePairDevice
+	createPairDevice CreatePairDeviceFunc
 }
 
 func (ph *PairHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +51,7 @@ func (ph *PairHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"active"}`))
 }
 
-type CreatePairDevice func(p Pair) error
+type CreatePairDeviceFunc func(p Pair) error
 
 func createPairDevice(p Pair) error {
 	db, err := sql.Open("sqlite3", "hometic.db")
