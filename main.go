@@ -24,6 +24,11 @@ func (w *JSONResponseWriter) Write(p []byte) (int, error) {
 	return w.ResponseWriter.Write(p)
 }
 
+func (w JSONResponseWriter) WriteHeader(statusCode int) {
+	w.Header().Set("content-type", "application/json")
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+
 func main() {
 	db, err := sql.Open("sqlite3", "hometic.db")
 	if err != nil {
