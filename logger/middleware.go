@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-type logkey = string
+type logkey string
 
 const key logkey = "logger"
 
