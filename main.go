@@ -17,7 +17,7 @@ type Pair struct {
 func main() {
 
 	r := mux.NewRouter()
-	r.Handle("/pairs", &PairHandler{createPairDevice}).Methods(http.MethodPost)
+	r.Handle("/pairs", CreatePairHandler(createPairDevice)).Methods(http.MethodPost)
 
 	srv := http.Server{
 		Handler: r,
@@ -28,27 +28,25 @@ func main() {
 	log.Fatal(srv.ListenAndServe())
 }
 
-type PairHandler struct {
-	createPairDevice CreatePairDeviceFunc
-}
+func CreatePairHandler(createPairDevice CreatePairDeviceFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var d Pair
+		err := json.NewDecoder(r.Body).Decode(&d)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(err.Error())
+			return
+		}
 
-func (ph *PairHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var d Pair
-	err := json.NewDecoder(r.Body).Decode(&d)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err.Error())
-		return
+		err = createPairDevice(d)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(err.Error())
+			return
+		}
+
+		w.Write([]byte(`{"status":"active"}`))
 	}
-
-	err = ph.createPairDevice(d)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(err.Error())
-		return
-	}
-
-	w.Write([]byte(`{"status":"active"}`))
 }
 
 type CreatePairDeviceFunc func(p Pair) error
