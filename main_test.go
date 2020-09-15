@@ -22,7 +22,7 @@ func TestCreateDeviceHandler(t *testing.T) {
 		return nil
 	}
 
-	CreateDevicesHandler(rec, req)
+	ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Error("it should be okay but it not!!!!")
