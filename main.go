@@ -1,9 +1,9 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/anuchito/hometic/logger"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"log"
@@ -16,14 +16,6 @@ type Pair struct {
 	UserID int64
 }
 
-func LoggerMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		l, _ := zap.NewDevelopment()
-		l = l.With(zap.Namespace("hometic"), zap.String("I'm", "gopher"))
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "logger", l)))
-	})
-}
-
 func main() {
 	db, err := sql.Open("sqlite3", "hometic.db")
 	if err != nil {
@@ -31,7 +23,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.Use(LoggerMiddleware)
+	r.Use(logger.LoggerMiddleware)
 	r.Handle("/pairs", CreatePairHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
 	srv := http.Server{
