@@ -37,12 +37,7 @@ func CreateDevicesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := sql.Open("sqlite3", "hometic.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec("INSERT INTO pairs VALUES (?,?);", d.ID, d.UserID)
+	err = createPairDevice(d)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
@@ -50,4 +45,14 @@ func CreateDevicesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte(`{"status":"active"}`))
+}
+
+var createPairDevice = func(p Pair) error {
+	db, err := sql.Open("sqlite3", "hometic.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec("INSERT INTO pairs VALUES (?,?);", p.ID, p.UserID)
+	return err
 }

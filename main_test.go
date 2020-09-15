@@ -14,6 +14,14 @@ func TestCreateDeviceHandler(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/devices", payload)
 	rec := httptest.NewRecorder()
 
+	origin := createPairDevice
+	defer func() {
+		createPairDevice = origin
+	}()
+	createPairDevice = func(p Pair) error {
+		return nil
+	}
+
 	CreateDevicesHandler(rec, req)
 
 	if rec.Code != http.StatusOK {
