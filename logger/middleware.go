@@ -6,7 +6,9 @@ import (
 	"net/http"
 )
 
-const key = "logger"
+type logkey string
+
+const key logkey = "logger"
 
 func LoggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
