@@ -15,6 +15,15 @@ type Pair struct {
 	UserID int64
 }
 
+type JSONResponseWriter struct {
+	http.ResponseWriter
+}
+
+func (w *JSONResponseWriter) Write(p []byte) (int, error) {
+	w.Header().Set("content-type", "application/json")
+	return w.ResponseWriter.Write(p)
+}
+
 func main() {
 	db, err := sql.Open("sqlite3", "hometic.db")
 	if err != nil {
@@ -23,6 +32,11 @@ func main() {
 
 	r := mux.NewRouter()
 	r.Use(logger.LoggerMiddleware)
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(&JSONResponseWriter{w}, r)
+		})
+	})
 	r.Handle("/pairs", CreatePairHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
 	srv := http.Server{
