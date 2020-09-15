@@ -15,9 +15,14 @@ type Pair struct {
 }
 
 func main() {
+	db, err := sql.Open("sqlite3", "hometic.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 
 	r := mux.NewRouter()
-	r.Handle("/pairs", CreatePairHandler(CreatePairDeviceFunc(createPairDevice))).Methods(http.MethodPost)
+	r.Handle("/pairs", CreatePairHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
 	srv := http.Server{
 		Handler: r,
@@ -59,12 +64,9 @@ func (fn CreatePairDeviceFunc) Pair(p Pair) error {
 	return fn(p)
 }
 
-func createPairDevice(p Pair) error {
-	db, err := sql.Open("sqlite3", "hometic.db")
-	if err != nil {
-		log.Fatal(err)
+func NewCreatePairDevice(db *sql.DB) CreatePairDeviceFunc {
+	return func(p Pair) error {
+		_, err := db.Exec("INSERT INTO pairs VALUES (?,?);", p.ID, p.UserID)
+		return err
 	}
-
-	_, err = db.Exec("INSERT INTO pairs VALUES (?,?);", p.ID, p.UserID)
-	return err
 }
