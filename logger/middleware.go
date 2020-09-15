@@ -13,3 +13,17 @@ func LoggerMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "logger", l)))
 	})
 }
+
+func L(ctx context.Context) *zap.Logger {
+	v := ctx.Value("logger")
+	if v == nil{
+		return zap.NewExample()
+	}
+
+	l, ok := v.(*zap.Logger)
+	if ok {
+		return l
+	}
+
+	return zap.NewExample()
+}
