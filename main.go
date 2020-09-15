@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/anuchito/hometic/logger"
 	"github.com/gorilla/mux"
-	"go.uber.org/zap"
 	"log"
 	"net/http"
 	_ "rsc.io/sqlite"
@@ -37,7 +36,7 @@ func main() {
 
 func CreatePairHandler(device Device) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		r.Context().Value("logger").(*zap.Logger).Info("pair-device")
+		logger.L(r.Context()).Info("pair-device")
 		var d Pair
 		err := json.NewDecoder(r.Body).Decode(&d)
 		if err != nil {
