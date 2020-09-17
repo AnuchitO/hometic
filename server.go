@@ -1,16 +1,18 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	_ "rsc.io/sqlite"
 )
 
 type Pair struct {
-	ID     int64
-	UserID int64
+	DeviceID int64
+	UserID   int64
 }
 
 func main() {
@@ -39,6 +41,17 @@ func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	log.Printf("pair: %#v\n", p)
+	db, err := sql.Open("sqlite3", "hometic.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec("INSERT INTO pairs VALUES (?,?);", p.DeviceID, p.UserID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
 
 	w.Write([]byte(`{"status":"active"}`))
 }
