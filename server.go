@@ -77,8 +77,7 @@ func PairDeviceHandler(device Device) http.Handler {
 		var p Pair
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(err.Error())
+			w.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 		defer r.Body.Close()
@@ -86,8 +85,7 @@ func PairDeviceHandler(device Device) http.Handler {
 		log.Printf("pair: %#v\n", p)
 		err = device.Pair(p)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(err.Error())
+			w.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 
