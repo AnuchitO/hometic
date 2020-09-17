@@ -46,11 +46,6 @@ func main() {
 
 	r := mux.NewRouter()
 	r.Use(logger.LoggerMiddleware)
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(&JSONResponseWriter{w}, r)
-		})
-	})
 	r.Handle("/pairs", CreatePairHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
 	srv := http.Server{
