@@ -25,7 +25,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.Use(logger.LoggerMiddleware)
+	r.Use(logger.Middleware)
 
 	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
