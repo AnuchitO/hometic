@@ -51,7 +51,7 @@ func main() {
 			next.ServeHTTP(&JSONResponseWriter{w}, r)
 		})
 	})
-	r.Handle("/pairs", CustomHandlerFunc(CreatePairHandler(NewCreatePairDevice(db)))).Methods(http.MethodPost)
+	r.Handle("/pairs", CreatePairHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
 	srv := http.Server{
 		Handler: r,
@@ -73,10 +73,7 @@ func (f CustomHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	f(&JSONResponseWriter{w}, r)
 }
 
-func (CustomHandlerFunc) JSON(statusCode int, data interface{}) {
-}
-
-func CreatePairHandler(device Device) func(w CustomResponseWriter, r *http.Request) {
+func CreatePairHandler(device Device) CustomHandlerFunc {
 	return func(w CustomResponseWriter, r *http.Request) {
 		logger.L(r.Context()).Info("pair-device")
 		var d Pair
