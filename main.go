@@ -74,15 +74,13 @@ func CreatePairHandler(device Device) CustomHandlerFunc {
 		var d Pair
 		err := json.NewDecoder(r.Body).Decode(&d)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(err.Error())
+			w.JSON(http.StatusBadRequest, err.Error())
 			return
 		}
 
 		err = device.Pair(d)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(err.Error())
+			w.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 
