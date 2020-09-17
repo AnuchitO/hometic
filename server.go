@@ -60,6 +60,11 @@ func (w JSONResponseWriter) WriteHeader(statusCode int) {
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
+func (w *JSONResponseWriter) JSON(statusCode int, data interface{}) {
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(data)
+}
+
 func PairDeviceHandler(device Device) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logger.L(r.Context()).Info("pair-device")
@@ -80,8 +85,7 @@ func PairDeviceHandler(device Device) http.HandlerFunc {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"active"}`))
+		w.(*JSONResponseWriter).JSON(http.StatusOK, `{"status":"active"}`)
 	}
 }
 
