@@ -17,6 +17,14 @@ type Pair struct {
 	UserID   int64
 }
 
+func LoggerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l, _ := zap.NewDevelopment()
+		l = l.With(zap.Namespace("hometic"), zap.String("I'm", "gopher"))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "logger", l)))
+	})
+}
+
 func main() {
 	fmt.Println("hello Gopher!")
 	db, err := sql.Open("sqlite3", "hometic.db")
@@ -25,13 +33,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			l, _ := zap.NewDevelopment()
-			l = l.With(zap.Namespace("hometic"), zap.String("I'm", "gopher"))
-			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "logger", l)))
-		})
-	})
+	r.Use(LoggerMiddleware)
 
 	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
