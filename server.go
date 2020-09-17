@@ -31,7 +31,7 @@ func main() {
 		})
 	})
 
-	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
+	r.Handle("/pair-device", CustomHandlerFunc(PairDeviceHandler(NewCreatePairDevice(db)))).Methods(http.MethodPost)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:2009",
@@ -65,8 +65,22 @@ func (w *JSONResponseWriter) JSON(statusCode int, data interface{}) {
 	json.NewEncoder(w).Encode(data)
 }
 
-func PairDeviceHandler(device Device) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+type CustomResponseWriter interface {
+	http.ResponseWriter
+	JSON(statusCode int, data interface{})
+}
+
+type CustomHandlerFunc func(CustomResponseWriter, *http.Request)
+
+func (f CustomHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	f(&JSONResponseWriter{w}, r)
+}
+
+func (CustomHandlerFunc) JSON(statusCode int, data interface{}) {
+}
+
+func PairDeviceHandler(device Device) func(w CustomResponseWriter, r *http.Request) {
+	return func(w CustomResponseWriter, r *http.Request) {
 		logger.L(r.Context()).Info("pair-device")
 		var p Pair
 		err := json.NewDecoder(r.Body).Decode(&p)
@@ -85,7 +99,7 @@ func PairDeviceHandler(device Device) http.HandlerFunc {
 			return
 		}
 
-		w.(*JSONResponseWriter).JSON(http.StatusOK, `{"status":"active"}`)
+		w.JSON(http.StatusOK, map[string]interface{}{"status": "active"})
 	}
 }
 
