@@ -19,7 +19,7 @@ func main() {
 	fmt.Println("hello Gopher!")
 
 	r := mux.NewRouter()
-	r.HandleFunc("/pair-device", ServeHTTP).Methods(http.MethodPost)
+	r.Handle("/pair-device", &PairDeviceHandler{createPairDevice}).Methods(http.MethodPost)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:2009",
@@ -30,7 +30,11 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func ServeHTTP(w http.ResponseWriter, r *http.Request) {
+type PairDeviceHandler struct {
+	createPairDevice CreatePairDevice
+}
+
+func (pd *PairDeviceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var p Pair
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
@@ -41,7 +45,7 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	log.Printf("pair: %#v\n", p)
-	err = createPairDevice(p)
+	err = pd.createPairDevice(p)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err.Error())
