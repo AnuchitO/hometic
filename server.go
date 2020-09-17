@@ -19,7 +19,7 @@ func main() {
 	fmt.Println("hello Gopher!")
 
 	r := mux.NewRouter()
-	r.HandleFunc("/pair-device", PairDeviceHandler(createPairDevice{})).Methods(http.MethodPost)
+	r.HandleFunc("/pair-device", PairDeviceHandler(CreatePairDeviceFunc(createPairDevice))).Methods(http.MethodPost)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:2009",
@@ -59,10 +59,11 @@ type Device interface {
 
 type CreatePairDeviceFunc func(p Pair) error
 
-type createPairDevice struct {
+func (fn CreatePairDeviceFunc) Pair(p Pair) error {
+	return fn(p)
 }
 
-func (createPairDevice) Pair(p Pair) error {
+func createPairDevice(p Pair) error {
 	db, err := sql.Open("sqlite3", "hometic.db")
 	if err != nil {
 		log.Fatal(err)
