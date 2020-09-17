@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 	"log"
 	"net/http"
 	_ "rsc.io/sqlite"
@@ -23,6 +25,14 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			l, _ := zap.NewDevelopment()
+			l = l.With(zap.Namespace("hometic"), zap.String("I'm", "gopher"))
+			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "logger", l)))
+		})
+	})
+
 	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
 	server := http.Server{
@@ -36,6 +46,7 @@ func main() {
 
 func PairDeviceHandler(device Device) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r.Context().Value("logger").(*zap.Logger).Info("pair-device")
 		var p Pair
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
