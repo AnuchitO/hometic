@@ -71,15 +71,14 @@ func (f CustomHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func CreatePairHandler(device Device) CustomHandlerFunc {
 	return func(w CustomResponseWriter, r *http.Request) {
 		logger.L(r.Context()).Info("pair-device")
+
 		var d Pair
-		err := json.NewDecoder(r.Body).Decode(&d)
-		if err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
 			w.JSON(http.StatusBadRequest, err.Error())
 			return
 		}
 
-		err = device.Pair(d)
-		if err != nil {
+		if err := device.Pair(d); err != nil {
 			w.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
