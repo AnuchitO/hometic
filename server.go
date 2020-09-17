@@ -51,6 +51,11 @@ func (w *JSONResponseWriter) Write(p []byte) (int, error) {
 	return w.ResponseWriter.Write(p)
 }
 
+func (w JSONResponseWriter) WriteHeader(statusCode int) {
+	w.Header().Set("content-type", "application/json")
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+
 func PairDeviceHandler(device Device) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logger.L(r.Context()).Info("pair-device")
