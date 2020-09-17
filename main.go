@@ -58,7 +58,6 @@ func main() {
 }
 
 type CustomResponseWriter interface {
-	http.ResponseWriter
 	JSON(statusCode int, data interface{})
 }
 
