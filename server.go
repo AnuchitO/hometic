@@ -31,7 +31,7 @@ func main() {
 		})
 	})
 
-	r.Handle("/pair-device", CustomHandlerFunc(PairDeviceHandler(NewCreatePairDevice(db)))).Methods(http.MethodPost)
+	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:2009",
@@ -76,10 +76,7 @@ func (f CustomHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	f(&JSONResponseWriter{w}, r)
 }
 
-func (CustomHandlerFunc) JSON(statusCode int, data interface{}) {
-}
-
-func PairDeviceHandler(device Device) func(w CustomResponseWriter, r *http.Request) {
+func PairDeviceHandler(device Device) CustomHandlerFunc {
 	return func(w CustomResponseWriter, r *http.Request) {
 		logger.L(r.Context()).Info("pair-device")
 		var p Pair
