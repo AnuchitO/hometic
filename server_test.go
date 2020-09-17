@@ -22,7 +22,7 @@ func TestCreatePairDevice(t *testing.T) {
 		return nil
 	}
 
-	PairDeviceHandler(rec, req)
+	ServeHTTP(rec, req)
 
 	if http.StatusOK != rec.Code {
 		t.Error("expect 200 OK but got ", rec.Code)

@@ -19,7 +19,7 @@ func main() {
 	fmt.Println("hello Gopher!")
 
 	r := mux.NewRouter()
-	r.HandleFunc("/pair-device", PairDeviceHandler).Methods(http.MethodPost)
+	r.HandleFunc("/pair-device", ServeHTTP).Methods(http.MethodPost)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:2009",
@@ -30,7 +30,7 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
+func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var p Pair
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
