@@ -57,7 +57,7 @@ func (pd *PairDeviceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type CreatePairDevice func(p Pair) error
 
-var createPairDevice = func(p Pair) error {
+func createPairDevice(p Pair) error {
 	db, err := sql.Open("sqlite3", "hometic.db")
 	if err != nil {
 		log.Fatal(err)
