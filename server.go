@@ -25,6 +25,11 @@ func main() {
 
 	r := mux.NewRouter()
 	r.Use(logger.Middleware)
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(&JSONResponseWriter{w}, r)
+		})
+	})
 
 	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
@@ -35,6 +40,15 @@ func main() {
 
 	log.Println("starting...")
 	log.Fatal(server.ListenAndServe())
+}
+
+type JSONResponseWriter struct {
+	http.ResponseWriter
+}
+
+func (w *JSONResponseWriter) Write(p []byte) (int, error) {
+	w.Header().Set("content-type", "application/json")
+	return w.ResponseWriter.Write(p)
 }
 
 func PairDeviceHandler(device Device) http.HandlerFunc {
