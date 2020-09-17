@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
@@ -28,5 +29,16 @@ func main() {
 }
 
 func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
+	var p Pair
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
+	defer r.Body.Close()
+
+	log.Printf("pair: %#v\n", p)
+
 	w.Write([]byte(`{"status":"active"}`))
 }
