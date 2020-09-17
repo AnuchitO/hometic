@@ -75,16 +75,14 @@ func PairDeviceHandler(device Device) http.Handler {
 	return CustomHandlerFunc(func(w CustomResponseWriter, r *http.Request) {
 		logger.L(r.Context()).Info("pair-device")
 		var p Pair
-		err := json.NewDecoder(r.Body).Decode(&p)
-		if err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
 			w.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 		defer r.Body.Close()
 
 		log.Printf("pair: %#v\n", p)
-		err = device.Pair(p)
-		if err != nil {
+		if err := device.Pair(p); err != nil {
 			w.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
