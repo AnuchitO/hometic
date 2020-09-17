@@ -71,6 +71,7 @@ func PairDeviceHandler(device Device) http.HandlerFunc {
 			return
 		}
 
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"active"}`))
 	}
 }
