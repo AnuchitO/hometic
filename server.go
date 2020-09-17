@@ -19,7 +19,7 @@ func main() {
 	fmt.Println("hello Gopher!")
 
 	r := mux.NewRouter()
-	r.HandleFunc("/pair-device", PairDeviceHandler(createPairDevice)).Methods(http.MethodPost)
+	r.HandleFunc("/pair-device", PairDeviceHandler(createPairDevice{})).Methods(http.MethodPost)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:2009",
@@ -30,7 +30,7 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func PairDeviceHandler(createPairDevice CreatePairDeviceFunc) http.HandlerFunc {
+func PairDeviceHandler(device Device) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p Pair
 		err := json.NewDecoder(r.Body).Decode(&p)
@@ -42,7 +42,7 @@ func PairDeviceHandler(createPairDevice CreatePairDeviceFunc) http.HandlerFunc {
 		defer r.Body.Close()
 
 		log.Printf("pair: %#v\n", p)
-		err = createPairDevice(p)
+		err = device.Pair(p)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(err.Error())
@@ -53,9 +53,16 @@ func PairDeviceHandler(createPairDevice CreatePairDeviceFunc) http.HandlerFunc {
 	}
 }
 
+type Device interface {
+	Pair(p Pair) error
+}
+
 type CreatePairDeviceFunc func(p Pair) error
 
-func createPairDevice(p Pair) error {
+type createPairDevice struct {
+}
+
+func (createPairDevice) Pair(p Pair) error {
 	db, err := sql.Open("sqlite3", "hometic.db")
 	if err != nil {
 		log.Fatal(err)
