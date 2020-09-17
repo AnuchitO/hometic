@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/anuchito/hometic/logger"
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 	"log"
 	"net/http"
 	_ "rsc.io/sqlite"
@@ -40,6 +41,7 @@ func main() {
 func PairDeviceHandler(device Device) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logger.L(r.Context()).Info("pair-device")
+		r.Context().Value("logger").(*zap.Logger).Info("string key pair-device")
 		var p Pair
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
