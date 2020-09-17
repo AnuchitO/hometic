@@ -19,7 +19,7 @@ func main() {
 	fmt.Println("hello Gopher!")
 
 	r := mux.NewRouter()
-	r.Handle("/pair-device", PairDeviceHandler(createPairDevice)).Methods(http.MethodPost)
+	r.HandleFunc("/pair-device", PairDeviceHandler(createPairDevice)).Methods(http.MethodPost)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:2009",
