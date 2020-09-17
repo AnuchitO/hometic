@@ -3,11 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
-
 
 func TestCreateDeviceHandler(t *testing.T) {
 	payload := new(bytes.Buffer)
@@ -15,9 +15,9 @@ func TestCreateDeviceHandler(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/devices", payload)
 	rec := httptest.NewRecorder()
 
-	handler := CreatePairHandler(CreatePairDeviceFunc(func(p Pair) error {
+	handler := CustomHandlerFunc(CreatePairHandler(CreatePairDeviceFunc(func(p Pair) error {
 		return nil
-	}))
+	})))
 
 	handler.ServeHTTP(rec, req)
 
@@ -25,7 +25,8 @@ func TestCreateDeviceHandler(t *testing.T) {
 		t.Error("it should be okay but it not!!!!")
 	}
 
-	if rec.Body.String() != `{"status":"active"}` {
-		t.Error("it should be active you know!!!")
+	expected, _ := json.Marshal(map[string]interface{}{"status": "active"})
+	if rec.Body.String() != fmt.Sprintf("%s\n", expected) {
+		t.Errorf("it should be active you know!!! expected:%q\nbut got:%q\n", rec.Body.String(), expected)
 	}
 }
