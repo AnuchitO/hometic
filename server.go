@@ -51,6 +51,8 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"active"}`))
 }
 
+type CreatePairDevice func(p Pair) error
+
 var createPairDevice = func(p Pair) error {
 	db, err := sql.Open("sqlite3", "hometic.db")
 	if err != nil {
