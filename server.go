@@ -61,7 +61,6 @@ func (w *JSONResponseWriter) JSON(statusCode int, data interface{}) {
 }
 
 type CustomResponseWriter interface {
-	http.ResponseWriter
 	JSON(statusCode int, data interface{})
 }
 
@@ -71,8 +70,8 @@ func (f CustomHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	f(&JSONResponseWriter{w}, r)
 }
 
-func PairDeviceHandler(device Device) http.Handler {
-	return CustomHandlerFunc(func(w CustomResponseWriter, r *http.Request) {
+func PairDeviceHandler(device Device) CustomHandlerFunc {
+	return func(w CustomResponseWriter, r *http.Request) {
 		logger.L(r.Context()).Info("pair-device")
 		var p Pair
 		if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
@@ -88,7 +87,7 @@ func PairDeviceHandler(device Device) http.Handler {
 		}
 
 		w.JSON(http.StatusOK, map[string]interface{}{"status": "active"})
-	})
+	}
 }
 
 type Device interface {
