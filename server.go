@@ -29,7 +29,8 @@ func main() {
 
 	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
-	addr := fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT"))
+	addr := fmt.Sprintf("%s:%s", host(os.Getenv("HOST")), port(os.Getenv("PORT")))
+	fmt.Println("addr:", addr)
 	server := http.Server{
 		Addr:    addr,
 		Handler: r,
@@ -37,6 +38,22 @@ func main() {
 
 	log.Println("starting...")
 	log.Fatal(server.ListenAndServe())
+}
+
+func host(h string) string {
+	if h == "" {
+		return "127.0.0.1"
+	}
+
+	return h
+}
+
+func port(p string) string {
+	if p == "" {
+		return "2009"
+	}
+
+	return p
 }
 
 type JSONResponseWriter struct {
