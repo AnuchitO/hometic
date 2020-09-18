@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"github.com/anuchito/hometic/logger"
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 	"log"
 	"net/http"
-	_ "rsc.io/sqlite"
+	"os"
 )
 
 type Pair struct {
@@ -18,7 +19,7 @@ type Pair struct {
 
 func main() {
 	fmt.Println("hello Gopher!")
-	db, err := sql.Open("sqlite3", "hometic.db")
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,8 +29,9 @@ func main() {
 
 	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
+	addr := fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT"))
 	server := http.Server{
-		Addr:    "127.0.0.1:2009",
+		Addr:    addr,
 		Handler: r,
 	}
 
@@ -102,7 +104,7 @@ func (fn CreatePairDeviceFunc) Pair(p Pair) error {
 
 func NewCreatePairDevice(db *sql.DB) CreatePairDeviceFunc {
 	return func(p Pair) error {
-		_, err := db.Exec("INSERT INTO pairs VALUES (?,?);", p.DeviceID, p.UserID)
+		_, err := db.Exec("INSERT INTO pairs VALUES ($1,$2);", p.DeviceID, p.UserID)
 		return err
 	}
 }
